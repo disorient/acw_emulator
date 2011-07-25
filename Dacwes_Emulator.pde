@@ -24,6 +24,10 @@ import hypermedia.net.*;
 int Y_AXIS = 1;
 int X_AXIS = 2;
 
+int HEIGHT = 8;
+int WIDTH  = 16;
+boolean VERTICAL = false; // set to false when panels are mounted horizontally
+
 // privates
 UDP udp;
 int[] state;
@@ -81,11 +85,20 @@ void paintBackground() {
 void paintSign() {
   noFill();
   stroke(0);
-  rect(40,200,640,160);
+  rect(40,200,WIDTH*20,HEIGHT*20);
   
   fill(nightMode ? 50 : 150);
-  for (int i=0; i<32; i++) {
-      rect(46+i*20,200,6,160);
+  if (VERTICAL)
+  {
+    for (int i=0; i<WIDTH; i++) {
+        rect(46+i*20,200,6,HEIGHT*20);
+    }
+  }
+  else
+  {
+    for (int i=0; i<HEIGHT; i++) {
+        rect(40,210+i*20,WIDTH*20,6);
+    }
   }
 }
 
@@ -100,9 +113,13 @@ void paintBoards() {
   noStroke();
 
   int i;
-  for (int y=0; y<8; y++) {
-    for (int x=0; x<32; x++) {
-      i = x * 8 + y;
+  for (int y=0; y<HEIGHT; y++) {
+    for (int x=0; x<WIDTH; x++) {
+      if (VERTICAL)
+        i = x * HEIGHT + y;
+      else
+        i = (x % 8) + floor(x / 8)*8*HEIGHT + y*8;
+      
       fill(state[i], state[i]/255.0*100, 0);
       
       rect(x*20+46,y*20+210,7,6);
@@ -112,16 +129,16 @@ void paintBoards() {
 
 void runDemo() {
   if (crawl == -1 && state[0] < 255) {
-     for (int i=0; i<256; i++) {
+     for (int i=0; i<WIDTH*HEIGHT; i++) {
        state[i]+=8;
      }
   }
   else {
     crawl++;
-    for (int i=0; i<256; i++) {
+    for (int i=0; i<WIDTH*HEIGHT; i++) {
       state[i] = (crawl == i) ? 255 : 0;
     }
-    if (crawl>255)
+    if (crawl>=WIDTH*HEIGHT)
       crawl = -1;
   }    
 }
