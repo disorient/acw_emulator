@@ -1,3 +1,5 @@
+import hypermedia.net.*;
+
 /**
  * This sketch emulates the Disorient Art Car Wash Electronic Sign
  * At Burning Man 2010.  The sign is a 64' x 16' 32x8 pixel grid.
