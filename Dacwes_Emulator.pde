@@ -17,16 +17,29 @@
  * You may use under a CC+Attribution License.
  *
  **/
- 
+
 import hypermedia.net.*;
 
 // constants
 int Y_AXIS = 1;
 int X_AXIS = 2;
 
-int HEIGHT = 8;
-int WIDTH  = 16;
-boolean VERTICAL = false; // set to false when panels are mounted horizontally
+// These are the addressing schemes, which vary with how the sign is constructed.  
+// The comments are describing how the pixel addresses are laid out in order.  Keep
+// in mind that if the sign is in vertical mode that the pixels go from top to bottom
+// not left to right.  The comments assume the pixels per channel are 8.
+int ADDRESSING_NORMAL = 1;    // 0-256
+int ADDRESSING_FLIPFLOP = 2;  // 0-7, 15-8, 16-23, 31-24...
+int ADDRESSING_HALF = 3;      // 0-7, 128-135, 8-15, 136-143...
+
+// Configuration
+int PIXELS_PER_CHANNEL = 8;
+int ADDRESSING = ADDRESSING_FLIPFLOP;
+int HEIGHT = 16;
+int WIDTH  = 15;
+int BOARD_SPACING = 20;
+int CHANNEL_SPACING = 40;
+boolean VERTICAL = true; // set to false when panels are mounted horizontally
 
 // privates
 UDP udp;
@@ -34,8 +47,20 @@ int[] state;
 int crawl = -1;
 boolean demoMode = true;
 boolean nightMode = true;
+int top = 200;
+int left = 40;
 
 void setup() {
+  if (VERTICAL) {
+    left = 360 - (WIDTH * (CHANNEL_SPACING/2));
+    top = 360 - (HEIGHT * BOARD_SPACING);
+  }
+  else {
+    left = 360 - (WIDTH * (BOARD_SPACING/2));
+    top = 360 - (HEIGHT * CHANNEL_SPACING);
+  }
+  
+  
   udp = new UDP( this, 58082 );
   udp.listen( true );
 
@@ -85,19 +110,27 @@ void paintBackground() {
 void paintSign() {
   noFill();
   stroke(0);
-  rect(40,200,WIDTH*20,HEIGHT*20);
+  
+  if (VERTICAL)
+  {
+    rect(left,top,WIDTH*CHANNEL_SPACING,HEIGHT*BOARD_SPACING);
+  }
+  else
+  {
+    rect(left,top,WIDTH*BOARD_SPACING,HEIGHT*CHANNEL_SPACING);
+  }
   
   fill(nightMode ? 50 : 150);
   if (VERTICAL)
   {
     for (int i=0; i<WIDTH; i++) {
-        rect(46+i*20,200,6,HEIGHT*20);
+        rect(left+i*CHANNEL_SPACING+(CHANNEL_SPACING/2),top,6,HEIGHT*BOARD_SPACING);
     }
   }
   else
   {
     for (int i=0; i<HEIGHT; i++) {
-        rect(40,210+i*20,WIDTH*20,6);
+        rect(left,top+i*CHANNEL_SPACING+(CHANNEL_SPACING/2),WIDTH*BOARD_SPACING,6);
     }
   }
 }
@@ -109,20 +142,65 @@ void initState() {
   }
 }
 
+int getAddress(int x, int y) {
+  if (VERTICAL) {
+    if (ADDRESSING == ADDRESSING_NORMAL) {
+      return (x * HEIGHT + y);
+    }
+    else if (ADDRESSING == ADDRESSING_HALF) {
+      return ((y % PIXELS_PER_CHANNEL) + floor(y / PIXELS_PER_CHANNEL)*PIXELS_PER_CHANNEL*WIDTH + x*PIXELS_PER_CHANNEL);
+    }
+    else if (ADDRESSING == ADDRESSING_FLIPFLOP) {
+      if (y>=PIXELS_PER_CHANNEL) {
+        int endAddress = (x+1) * HEIGHT - 1;
+        int address = endAddress - (y % PIXELS_PER_CHANNEL);
+        return address;
+      }
+      else {
+        return (x * HEIGHT + y);
+      }
+    }
+  }
+  else {
+    if (ADDRESSING == ADDRESSING_NORMAL) {
+      return (y * WIDTH + x);
+    }
+    else if (ADDRESSING == ADDRESSING_HALF) {
+      return ((x % PIXELS_PER_CHANNEL) + floor(x / PIXELS_PER_CHANNEL)*PIXELS_PER_CHANNEL*HEIGHT + y*PIXELS_PER_CHANNEL);
+    }
+    else if (ADDRESSING == ADDRESSING_FLIPFLOP) {
+      if (x>=PIXELS_PER_CHANNEL) {
+        int endAddress = (y+1) * WIDTH - 1;
+        int address = endAddress - (x % PIXELS_PER_CHANNEL);
+        return address;
+      }
+      else {
+        return (y * HEIGHT + x);
+      }
+    }
+  }  
+  
+  return 0;
+}
+
+
 void paintBoards() {
   noStroke();
 
   int i;
   for (int y=0; y<HEIGHT; y++) {
     for (int x=0; x<WIDTH; x++) {
-      if (VERTICAL)
-        i = x * HEIGHT + y;
-      else
-        i = (x % 8) + floor(x / 8)*8*HEIGHT + y*8;
+      i = getAddress(x,y);
       
       fill(state[i], state[i]/255.0*100, 0);
       
-      rect(x*20+46,y*20+210,7,6);
+      // FIXME
+      if (VERTICAL) {
+        rect(x*CHANNEL_SPACING+left+(CHANNEL_SPACING/2),y*BOARD_SPACING+top+(BOARD_SPACING/2),7,6);
+      }
+      else {
+        rect(x*BOARD_SPACING+left+(BOARD_SPACING/2),y*CHANNEL_SPACING+top+(CHANNEL_SPACING/2),7,6);
+      }
     }
   }
 }
