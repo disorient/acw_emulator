@@ -43,7 +43,7 @@ public class Dacwes {
   int w;
   int h;
   int addressingMode;
-  char buffer[];
+  byte buffer[];
   int pixelsPerChannel;
 
   public Dacwes(PApplet parent, int w, int h) {
@@ -53,7 +53,7 @@ public class Dacwes {
     this.port = 58082;
     this.w = w;
     this.h = h;
-    buffer = new char[257];
+    buffer = new byte[257];
     this.addressingMode = ADDRESSING_VERTICAL_NORMAL;
     this.pixelsPerChannel = 8;
     
@@ -118,8 +118,9 @@ public class Dacwes {
   public void sendData() {
     PImage image = get();
     
-    if (image.width != w || image.height != h) 
+    if (image.width != w || image.height != h) {
       image.resize(w,h);
+    }
       
     image.loadPixels();
 
@@ -127,12 +128,12 @@ public class Dacwes {
     buffer[0] = 1;
     for (int y=0; y<h; y++) {
       for (int x=0; x<w; x++) {
-        r = (image.pixels[y*w+x] >> 16 & 0xFF);
-        buffer[getAddress(x,y)+1] = (char)r;
+        r = int(brightness(image.pixels[y*w+x]));
+        buffer[getAddress(x,y)+1] = byte(r);
       }
     }
     
-    udp.send(new String(buffer),address,port);
+    udp.send(buffer,address,port);
   }  
 }
   
