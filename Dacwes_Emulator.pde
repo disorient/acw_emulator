@@ -38,9 +38,9 @@ int ADDRESSING_HALF = 3;      // 0-7, 128-135, 8-15, 136-143...
 int PIXELS_PER_CHANNEL = 8;
 int ADDRESSING = ADDRESSING_FLIPFLOP;
 int HEIGHT = 16;
-int WIDTH  = 15;
+int WIDTH  = 16;
 int BOARD_SPACING = 20;
-int CHANNEL_SPACING = 40;
+int CHANNEL_SPACING = 20;
 boolean VERTICAL = true; // set to false when panels are mounted horizontally
 
 // privates
