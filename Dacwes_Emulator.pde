@@ -138,8 +138,8 @@ void paintSign() {
 }
 
 void initState() {
-  state = new int[256];
-  for (int i=0; i<256; i++) {
+  state = new int[WIDTH*HEIGHT];
+  for (int i=0; i<WIDTH*HEIGHT; i++) {
      state[i] = 0;
   }
 }
