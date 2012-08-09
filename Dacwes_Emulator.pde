@@ -39,6 +39,7 @@ int PIXELS_PER_CHANNEL = 8;
 int ADDRESSING = ADDRESSING_FLIPFLOP;
 int HEIGHT = 16;
 int WIDTH  = 16;
+boolean isRGB = false;
 int BOARD_SPACING = 20;
 int CHANNEL_SPACING = 20;
 boolean VERTICAL = true; // set to false when panels are mounted horizontally
@@ -138,7 +139,7 @@ void paintSign() {
 }
 
 void initState() {
-  state = new int[WIDTH*HEIGHT];
+  state = new int[(isRGB ? 3 : 1) * WIDTH * HEIGHT];
   for (int i=0; i<WIDTH*HEIGHT; i++) {
      state[i] = 0;
   }
@@ -192,9 +193,13 @@ void paintBoards() {
   int i;
   for (int y=0; y<HEIGHT; y++) {
     for (int x=0; x<WIDTH; x++) {
-      i = getAddress(x,y);
+      i = getAddress(x,y) * (isRGB ? 3 : 1);
       
-      fill(state[i], state[i]/255.0*100, 0);
+      if (isRGB) {
+        fill(state[i], state[i+1], state[i+2]);
+      } else {
+        fill(state[i], state[i]/255.0*100, 0);
+      }
       
       // FIXME
       if (VERTICAL) {
