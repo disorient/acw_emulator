@@ -3,6 +3,8 @@ import hypermedia.net.*;
 /**
  * This sketch emulates the Disorient Art Car Wash Electronic Sign
  * At Burning Man 2010.  The sign is a 64' x 16' 32x8 pixel grid.
+ * Uncomment the Want It! matrix display settings section to emulate
+ * a 25 x 12 RGB sign instead.
  *
  * Listens on port 58082 for UDP packets.  Packet is expected
  * to start with 1, followed by 256 bytes.  I believe the 1 
@@ -15,6 +17,7 @@ import hypermedia.net.*;
  * emulator.
  *
  * (c)2010 Justin Day
+ * Want It! matrix support (c)2012 Phillip Pearson
  *
  * You may use under a CC+Attribution License.
  *
@@ -36,13 +39,24 @@ int ADDRESSING_HALF = 3;      // 0-7, 128-135, 8-15, 136-143...
 
 // Configuration
 int PIXELS_PER_CHANNEL = 8;
-int ADDRESSING = ADDRESSING_FLIPFLOP;
-int HEIGHT = 16;
-int WIDTH  = 16;
-boolean isRGB = false;
 int BOARD_SPACING = 20;
 int CHANNEL_SPACING = 20;
+
+// Want It! matrix display settings
+int ADDRESSING = ADDRESSING_NORMAL;
+int WIDTH  = 25;
+int HEIGHT = 12;
+boolean isRGB = true;
+boolean VERTICAL = false; // set to false when panels are mounted horizontally
+
+/*
+// Disorient ACW settings
+int ADDRESSING = ADDRESSING_FLIPFLOP;
+int WIDTH  = 16;
+int HEIGHT = 16;
+boolean isRGB = true;
 boolean VERTICAL = true; // set to false when panels are mounted horizontally
+*/
 
 // privates
 UDP udp;
