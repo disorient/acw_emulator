@@ -7,7 +7,7 @@ import hypermedia.net.*;
  * a 25 x 12 RGB sign instead.
  *
  * Listens on port 58082 for UDP packets.  Packet is expected
- * to start with 1, followed by 256 bytes.  I believe the 1 
+ * to start with 1, followed by 256 bytes.  I believe the 1
  * signifies a new frame, but this emulator just expects 257
  * bytes.
  *
@@ -29,7 +29,7 @@ import hypermedia.net.*;
 int Y_AXIS = 1;
 int X_AXIS = 2;
 
-// These are the addressing schemes, which vary with how the sign is constructed.  
+// These are the addressing schemes, which vary with how the sign is constructed.
 // The comments are describing how the pixel addresses are laid out in order.  Keep
 // in mind that if the sign is in vertical mode that the pixels go from top to bottom
 // not left to right.  The comments assume the pixels per channel are 8.
@@ -76,15 +76,15 @@ void setup() {
     left = 360 - (WIDTH * (BOARD_SPACING/2));
     top = 360 - (HEIGHT * CHANNEL_SPACING);
   }
-  
-  
+
+
   udp = new UDP( this, 58082 );
   udp.listen( true );
 
   // Sign is 64' (10 pixels per foot plus buffer)
-  // By 16' (Lots more buffer)  
+  // By 16' (Lots more buffer)
   size(720,480);
-  
+
   paintBackground();
   paintSign();
   initState();
@@ -94,7 +94,7 @@ void setup() {
 
 void paintBackground() {
   color sky1, sky2, sky3;
-  
+
   if (nightMode) {
     sky1 = color(0,0,0);
     sky2 = color(0,0,50);
@@ -107,12 +107,12 @@ void paintBackground() {
   }
   color ply1 = color(30,10,10);
   color ply2 = color(130,100,100);
-  
+
   setGradient(0,0,720,100,sky1,sky2,Y_AXIS);
   fill(sky2); noStroke(); rect(0,100,720,80);
   setGradient(0,180,720,140,sky2,sky3,Y_AXIS);
   setGradient(0,320,720,160,ply1,ply2,Y_AXIS);
-  
+
   if (nightMode) {
       for (int i=0; i<100; i++) {
          int x = (int)random(720);
@@ -121,13 +121,13 @@ void paintBackground() {
          rect(x,y,2,2);
       }
   }
-  
+
 }
 
 void paintSign() {
   noFill();
   stroke(0);
-  
+
   if (VERTICAL)
   {
     rect(left,top,WIDTH*CHANNEL_SPACING,HEIGHT*BOARD_SPACING);
@@ -136,7 +136,7 @@ void paintSign() {
   {
     rect(left,top,WIDTH*BOARD_SPACING,HEIGHT*CHANNEL_SPACING);
   }
-  
+
   fill(nightMode ? 50 : 150);
   if (VERTICAL)
   {
@@ -195,8 +195,8 @@ int getAddress(int x, int y) {
         return (y * HEIGHT + x);
       }
     }
-  }  
-  
+  }
+
   return 0;
 }
 
@@ -208,13 +208,13 @@ void paintBoards() {
   for (int y=0; y<HEIGHT; y++) {
     for (int x=0; x<WIDTH; x++) {
       i = getAddress(x,y) * (isRGB ? 3 : 1);
-      
+
       if (isRGB) {
         fill(state[i], state[i+1], state[i+2]);
       } else {
         fill(state[i], state[i]/255.0*100, 0);
       }
-      
+
       // FIXME
       if (VERTICAL) {
         rect(x*CHANNEL_SPACING+left+(CHANNEL_SPACING/2),y*BOARD_SPACING+top+(BOARD_SPACING/2),7,6);
@@ -239,14 +239,14 @@ void runDemo() {
     }
     if (crawl>=WIDTH*HEIGHT)
       crawl = -1;
-  }    
+  }
 }
 
 void draw () {
   if (demoMode) {
     runDemo();
   }
-  
+
   paintBoards();
 }
 
@@ -255,19 +255,19 @@ void receive(byte[] data, String ip, int port) {
     println("Started receiving data from " + ip + ".  Demo mode disabled.");
     demoMode = false;
   }
-  
+
   if (data[0] == 1) {
     if (data.length < 257) {
         println("Packet size mismatch. Expected 257, got " + data.length);
     }
-    
+
     for (int i=1; i<data.length; i++) {
       state[i-1] = convertByte(data[i]);
     }
   }
   else {
     println("Packet header mismatch.  Expected 1, got " + data[0]);
-  }  
+  }
 }
 
 int convertByte(byte b) {
@@ -275,7 +275,7 @@ int convertByte(byte b) {
 }
 
 void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ){
-  // calculate differences between color components 
+  // calculate differences between color components
   float deltaR = red(c2)-red(c1);
   float deltaG = green(c2)-green(c1);
   float deltaB = blue(c2)-blue(c1);
@@ -291,25 +291,25 @@ void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ){
         color c = color(
         (red(c1)+(j-y)*(deltaR/h)),
         (green(c1)+(j-y)*(deltaG/h)),
-        (blue(c1)+(j-y)*(deltaB/h)) 
+        (blue(c1)+(j-y)*(deltaB/h))
           );
         set(i, j, c);
       }
-    }  
-  }  
+    }
+  }
   else if(axis == X_AXIS){
-    // column 
+    // column
     for (int i=y; i<=(y+h); i++){
       // row
       for (int j = x; j<=(x+w); j++){
         color c = color(
         (red(c1)+(j-x)*(deltaR/h)),
         (green(c1)+(j-x)*(deltaG/h)),
-        (blue(c1)+(j-x)*(deltaB/h)) 
+        (blue(c1)+(j-x)*(deltaB/h))
           );
         set(j, i, c);
       }
-    }  
+    }
   }
 }
 
