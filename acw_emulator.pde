@@ -125,7 +125,7 @@ void paintBackground() {
 }
 
 void paintSign() {
-  noFill();
+  fill(0);
   stroke(0);
 
   if (VERTICAL)
@@ -134,21 +134,7 @@ void paintSign() {
   }
   else
   {
-    rect(left,top,WIDTH*BOARD_SPACING,HEIGHT*CHANNEL_SPACING);
-  }
-
-  fill(nightMode ? 50 : 150);
-  if (VERTICAL)
-  {
-    for (int i=0; i<WIDTH; i++) {
-        rect(left+i*CHANNEL_SPACING+(CHANNEL_SPACING/2),top,6,HEIGHT*BOARD_SPACING);
-    }
-  }
-  else
-  {
-    for (int i=0; i<HEIGHT; i++) {
-        rect(left,top+i*CHANNEL_SPACING+(CHANNEL_SPACING/2),WIDTH*BOARD_SPACING,6);
-    }
+    rect(left,top,WIDTH*BOARD_SPACING+BOARD_SPACING/3,HEIGHT*CHANNEL_SPACING+CHANNEL_SPACING/3);
   }
 }
 
@@ -229,13 +215,23 @@ void paintBoards() {
 void runDemo() {
   if (crawl == -1 && state[0] < 255) {
      for (int i=0; i<WIDTH*HEIGHT; i++) {
-       state[i]+=8;
+       if (isRGB) {
+         state[3 * i] += 8;
+         state[3 * i + 1] += 8;
+         state[3 * i + 2] += 8;
+       } else {
+         state[i]+=8;
+       }
      }
   }
   else {
     crawl++;
     for (int i=0; i<WIDTH*HEIGHT; i++) {
-      state[i] = (crawl == i) ? 255 : 0;
+      if (isRGB) {
+         state[3 * i] = state[3 * i + 1] = state[3 * i + 2] = (crawl == i) ? 255 : 0;
+      } else {
+        state[i] = (crawl == i) ? 255 : 0;
+      }
     }
     if (crawl>=WIDTH*HEIGHT)
       crawl = -1;
